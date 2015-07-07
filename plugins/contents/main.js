@@ -19,7 +19,9 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
         storage: {
             content: {type: "model"},
-            contents: {type: "collection", model: "content"}
+            contents: {type: "collection", model: "content"},
+            mmStat:{type: "model"},
+            mmStats: {type: "collection", model: "mmStat"},
         },
 
         routes: [
@@ -122,7 +124,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                     var contentsStored = [];
                     MM.db.each("contents", function(el){
-                        contentsStored.push(el.get("id"));
+                        contentsStored.push(el.get("id"));                      
                     });
 
                     var finalContents = [];
@@ -133,11 +135,17 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             return true;
                         }
                         sectionName = sections.name;
+                        // fabrice setion name (weeks), index1 in row number in moodel alert( sections.name);
+
                         $.each(sections.modules, function(index2, content){
 
                             content.contentid = content.id;
                             content.courseid = courseId;
                             content.id = MM.config.current_site.id + "-" + content.contentid;
+
+                          //fabrice here display the file name  alert(content.name)
+                          alert("wawa" + content.contents[0].fileurl);// url of file
+                           // alert(content.contents[0].filesize);
 
                             if(!firstContent) {
                                 firstContent = content.contentid;
@@ -358,7 +366,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             );
         },
 
-        downloadContent: function(courseId, sectionId, contentId, index){
+        downloadContent: function(courseId, sectionId, contentId, index, automated){
             var file;
             var FILE_SIZE_WARNING = {
                 'phone':  5000000,
@@ -410,18 +418,58 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 index = 0;
             }
 
+
+            /// fabrice 
+
+           // var course = MM.db.get("courses", MM.config.current_site.id + "-" + courseId);
+
+            //alert( course.toJSON()   );
+           // alert(JSON.parse(JSON.stringify(course)));
+
+            if (typeof(automated) == "undefined" ) {
+                automated = true;
+            }
+
+               var stats = {            
+                'sectionId': sectionId,
+                'courseId': courseId,
+                'contentId': contentId,
+                'content': content,
+                'accesslinks':   { 
+                    'url':content.contents[0].fileurl, 
+                    'filename':content.contents[0].filename,
+                    'automated' : automated
+                }           
+            };
+
+alert("passed in" + stats.accesslinks.url);
+//alert(stats.content.contents[0].fileurl);
+           /* var stats={
+            sectionId: sectionId,
+             'name': 'testing'
+            };
+
+            MM.db.insert("mmStats", stats);
+
+            var result = MM.db.get("mmStats", stats);*/
+           // alert( result.get("name"));
+ 
+        
+           
+            ////////////
+
             var file = content.contents[index];
             var downloadURL = file.fileurl + "&token=" + MM.config.current_token;
-
+           
             // Now, we need to download the file.
             // First we load the file system (is not loaded yet).
             MM.fs.init(function() {
                 var path = MM.plugins.contents.getLocalPaths(courseId, contentId, file);
                 MM.log("Content: Starting download of file: " + downloadURL);
-                // All the functions are async, like create dir.
+                // All the functions are async, like create dir. 
                 MM.fs.createDir(path.directory, function() {
                     MM.log("Content: Downloading content to " + path.file + " from URL: " + downloadURL);
-
+ 
                     if ($(downCssId)) {
                         $(downCssId).attr("src", "img/loadingblack.gif");
                     }
@@ -653,7 +701,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
             // We store in the sdcard the contents in site/course/modname/id/contentIndex/filename
             var path = MM.config.current_site.id + "/" + courseId + "/" + modId;
-
+    
             // Check if the file is in a Moodle virtual directory.
             if (file.filepath) {
                 path += file.filepath;
@@ -661,7 +709,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             } else {
                 newfile = path + "/" + filename;
             }
-
+                                                                                         
+       
             return {
                 directory: path,
                 file: newfile

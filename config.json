@@ -8,7 +8,7 @@
 "plugins" : ["notifications", "messages", "upload", "events", "myfiles", "contents", "participants", "grades","addcontact", "addnote", "sendmessage", "forum", "label", "url", "page", "resource", "assign"],
 "wsservice" : "moodle_mobile_app",
 "wsextservice" : "local_mobile",
-"presets" : {"url": "http://192.168.100.5/", "username": "student", "password": "student"},
+"presets" : {"url": "http://192.168.0.18/", "username": "student", "password": "Crystal123*"},
 "sync_ws_on" : true,
 "sync_css_on" : true,
 "sync_cron": 300000,
