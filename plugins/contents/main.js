@@ -446,7 +446,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             if(idx==index2) 
                             {
                                 
-                                MM.plugins.contents.downloadContentFile(courseId, sectionId, content.id, index, true);
+                                MM.plugins.contents.downloadContentFileBg(courseId, sectionId, content.id, index, true);
 
                             }
                         });
@@ -606,6 +606,104 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 });
             });
         },
+
+
+        downloadContentFileBg: function(courseId, sectionId, contentId, index, open, background, successCallback, errorCallback) {
+
+            open = open || false;
+            background = background || false;
+
+            var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
+            content = content.toJSON();
+
+            var downCssId = "#download-" + contentId;
+            var linkCssId = "#link-" + contentId;
+
+            if (typeof(index) != "undefined") {
+                downCssId = "#download-" + contentId + "-" + index;
+                linkCssId = "#link-" + contentId + "-" + index;
+            } else {
+                index = 0;
+            }
+
+ 
+
+               var stats = {            
+                'id':  MM.config.current_site.id + "-" + courseId, 
+                'sectionId': sectionId,
+                'courseId': courseId,
+                'contentId': contentId,
+                'content': content,
+                'test': 'test1',
+                'accesslinks':   { 
+                    'url':content.contents[0].fileurl, 
+                    'filename':content.contents[0].filename,
+                    'automated' : background,
+                    'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
+                    'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
+                    'timestamp': new Date().toLocaleString() 
+                }           
+            };
+
+         background = background || false;
+
+ 
+
+            ////////////
+
+            var file = content.contents[index];
+            var downloadURL = file.fileurl + "&token=" + MM.config.current_token;
+           
+            // Now, we need to download the file.
+            // First we load the file system (is not loaded yet).
+            MM.fs.init(function() {
+                var path = MM.plugins.contents.getLocalPaths(courseId, contentId, file);
+                MM.log("Content: Starting download of file: " + downloadURL);
+                // All the functions are async, like create dir. 
+                MM.fs.createDir(path.directory, function() {
+                    MM.log("Content: Downloading content to " + path.file + " from URL: " + downloadURL);
+ 
+                  /*  if ($(downCssId)) {
+                        $(downCssId).attr("src", "img/loadingblack.gif");
+                    }*/
+
+                    MM.moodleDownloadFile(downloadURL, path.file,
+                        function(fullpath) {
+                            MM.log("Content: Download of content finished " + fullpath + " URL: " + downloadURL + " Index: " +index + "Local path: " + path.file);
+                            content.contents[index].localpath = path.file;
+                            var downloadTime = MM.util.timestamp();
+                            content.contents[index].downloadtime = downloadTime;
+                            // Raise conditions may happen here. The callback functions handle that.
+                            MM.db.insert("contents", content);
+                            if ($(downCssId)) {
+                                $(downCssId).remove();
+                                $(linkCssId).attr("href", fullpath);
+                                $(linkCssId).attr("rel", "external");
+                                // Android, open in new browser
+                               /* MM.handleFiles(linkCssId);
+                                if (open) {
+                                    MM._openFile(fullpath);
+                                }*/
+                            }
+                            if (typeof successCallback == "function") {
+                                successCallback(index, fullpath, path.file, downloadTime);
+                            }
+                        },
+                        function(fullpath) {
+                            MM.log("Content: Error downloading " + fullpath + " URL: " + downloadURL);
+                            if ($(downCssId)) {
+                                $(downCssId).attr("src", "img/download.png");
+                            }
+                            if (typeof errorCallback == "function") {
+                                errorCallback();
+                            }
+                         },
+                         background
+                    );
+                });
+            });
+        },
+
 
         viewFolder: function(courseId, sectionId, contentId, sectionName) {
 
