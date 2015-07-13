@@ -135,7 +135,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             return true;
                         }
                         sectionName = sections.name;
-                        // fabrice setion name (weeks), index1 in row number in moodel alert( sections.name);
+                        // fabrice setion name (weeks), index1 in row number in moodle alert( sections.name);
 
                         $.each(sections.modules, function(index2, content){
 
@@ -144,8 +144,16 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             content.id = MM.config.current_site.id + "-" + content.contentid;
 
                           //fabrice here display the file name  alert(content.name)
-                          alert("wawa" + content.contents[0].fileurl);// url of file
+                          //alert("url:" + content.contents[0].fileurl);// url of file
                            // alert(content.contents[0].filesize);
+/*
+                             var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId);
+
+                             if(typeof(result) != "undefined") 
+                             {
+                                alert( result.get("contentId") +  result.get("test") );
+                            }
+*/
 
                             if(!firstContent) {
                                 firstContent = content.contentid;
@@ -263,6 +271,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                             MM.db.insert("contents", content);
 
+                       
+                        alert("contentid:" + content.contentid+ " courseid: "+  courseId+ "name:" +content.name + "dwn: " +downloaded );
                             // Sync content files.
 
                             if (typeof(content.contents) != "undefined") {
@@ -366,7 +376,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             );
         },
 
-        downloadContent: function(courseId, sectionId, contentId, index, automated){
+        downloadContent: function(courseId, sectionId, contentId, index){
             var file;
             var FILE_SIZE_WARNING = {
                 'phone':  5000000,
@@ -426,36 +436,52 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             //alert( course.toJSON()   );
            // alert(JSON.parse(JSON.stringify(course)));
 
-            if (typeof(automated) == "undefined" ) {
-                automated = true;
-            }
+          //  if (typeof(automated) == "undefined" ) {
+           //     automated = true;
+          //  }
 
                var stats = {            
+                'id':  MM.config.current_site.id + "-" + courseId, 
                 'sectionId': sectionId,
                 'courseId': courseId,
                 'contentId': contentId,
                 'content': content,
+                'test': 'test1',
                 'accesslinks':   { 
                     'url':content.contents[0].fileurl, 
                     'filename':content.contents[0].filename,
-                    'automated' : automated
+                    'automated' : background,
+                    'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
+                    'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
+                    'timestamp': new Date().toLocaleString() 
                 }           
             };
 
-alert("passed in" + stats.accesslinks.url);
+         background = background || false;
+
+
+//alert("passed in" + stats.accesslinks.date);
 //alert(stats.content.contents[0].fileurl);
-           /* var stats={
-            sectionId: sectionId,
-             'name': 'testing'
-            };
+          
 
             MM.db.insert("mmStats", stats);
 
-            var result = MM.db.get("mmStats", stats);*/
-           // alert( result.get("name"));
- 
-        
+            var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId); 
+            alert( result.get("contentId") +  result.get("test") );
+                
+            stats.test = "test3";     
+            MM.db.insert("mmStats", stats);
+
+            stats.id =  MM.config.current_site.id + "-" + courseId + "b";
+            stats.test = "anotehr rec";     
+            MM.db.insert("mmStats", stats);
+/*
+            var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId); 
+            alert( result.get("contentId") +  result.get("test") );
            
+            var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId + "b"); 
+            alert( result.get("contentId") +  result.get("test") );*/
+
             ////////////
 
             var file = content.contents[index];
