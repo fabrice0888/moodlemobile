@@ -136,7 +136,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         }
                         sectionName = sections.name;
                         // fabrice setion name (weeks), index1 in row number in moodle alert( sections.name);
-
+ 
                         $.each(sections.modules, function(index2, content){
 
                             content.contentid = content.id;
@@ -146,14 +146,9 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                           //fabrice here display the file name  alert(content.name)
                           //alert("url:" + content.contents[0].fileurl);// url of file
                            // alert(content.contents[0].filesize);
-/*
-                             var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId);
 
-                             if(typeof(result) != "undefined") 
-                             {
-                                alert( result.get("contentId") +  result.get("test") );
-                            }
-*/
+                           
+
 
                             if(!firstContent) {
                                 firstContent = content.contentid;
@@ -213,8 +208,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                     }
                                     sections.modules[index2].downloaded = downloaded;
                                 }
-
-  alert("contentid:" + content.contentid+ " courseid: "+  courseId+ "name:" +content.name + "dwn: " +downloaded );
+   alert("contentid:" + content.contentid+ " courseid: "+  courseId+ "name:" +content.name + "dwn: " +downloaded );
                                 // Check if our stored information has changed remotely.
                                 var updateContentInDB = false;
                                 var contentElements = ['filename', 'fileurl' , 'filesize',
@@ -273,7 +267,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             MM.db.insert("contents", content);
 
                        
-                      
+                     
                             // Sync content files.
 
                             if (typeof(content.contents) != "undefined") {
@@ -392,6 +386,79 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             } else {
                 file = content.contents[0];
             }
+            //////////////////
+
+
+             var sectionName="";
+            var sectionNumber = 0;
+            if (sectionId > 0) {
+                sectionNumber = sectionId;
+            }
+
+            // We do the logging here and not using preSets because the following core_course_get_contents call is cached.
+            MM.moodleLogging(
+                'core_course_view_course',
+                {
+                    courseid: courseId,
+                    sectionnumber: sectionNumber
+                }
+            );
+
+            var data = {
+                'courseid': courseId
+            };
+
+
+            MM.moodleWSCall(
+                'core_course_get_contents',
+                data,
+                function(contents) {
+                    var course = MM.db.get("courses", MM.config.current_site.id + "-" + courseId);
+                    var courseName = course.get("fullname");
+
+                    var firstContent = 0;
+
+                    
+                    $.each(JSON.parse(JSON.stringify(contents)), function(index1, sections){
+                        // Skip sections deleting contents..
+                        if (sectionId > -1 && sectionId != index1) {
+                            // This is a continue.
+                            return true;
+                        }
+                        sectionName = sections.name;
+                        // fabrice setion name (weeks), index1 in row number in moodle alert( sections.name);
+                        
+                        var idx = 0;
+
+                        $.each(sections.modules, function(index2, content){
+
+                            if(content.id==contentId) 
+                            {
+                                idx = index2 + 1;
+                                 
+                            }
+                        });
+
+                 
+
+                        $.each(sections.modules, function(index2, content){
+
+                            if(idx==index2) 
+                            {
+                                
+                                MM.plugins.contents.downloadContentFile(courseId, sectionId, content.id, index, true);
+
+                            }
+                        });
+
+
+
+
+                    });
+    
+            });
+
+
 
             // Now we check if we have to alert the user that is about to download a large file.
             if (file.filesize) {
@@ -463,8 +530,10 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
 //alert("passed in" + stats.accesslinks.date);
 //alert(stats.content.contents[0].fileurl);
-          
+           
 
+          
+/*
             MM.db.insert("mmStats", stats);
 
             var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId); 
@@ -476,7 +545,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             stats.id =  MM.config.current_site.id + "-" + courseId + "b";
             stats.test = "anotehr rec";     
             MM.db.insert("mmStats", stats);
-/*
+
             var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId); 
             alert( result.get("contentId") +  result.get("test") );
            
