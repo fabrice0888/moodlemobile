@@ -676,7 +676,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             // Raise conditions may happen here. The callback functions handle that.
                             MM.db.insert("contents", content);
                             if ($(downCssId)) {
-                                $(downCssId).remove();
+                               // $(downCssId).remove();
                                 $(linkCssId).attr("href", fullpath);
                                 $(linkCssId).attr("rel", "external");
                                 // Android, open in new browser
