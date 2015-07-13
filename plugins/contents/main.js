@@ -214,6 +214,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                     sections.modules[index2].downloaded = downloaded;
                                 }
 
+  alert("contentid:" + content.contentid+ " courseid: "+  courseId+ "name:" +content.name + "dwn: " +downloaded );
                                 // Check if our stored information has changed remotely.
                                 var updateContentInDB = false;
                                 var contentElements = ['filename', 'fileurl' , 'filesize',
@@ -272,7 +273,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             MM.db.insert("contents", content);
 
                        
-                        alert("contentid:" + content.contentid+ " courseid: "+  courseId+ "name:" +content.name + "dwn: " +downloaded );
+                      
                             // Sync content files.
 
                             if (typeof(content.contents) != "undefined") {
