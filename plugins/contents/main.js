@@ -87,7 +87,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
 
         viewCourseContentsSection: function(courseId, sectionId) {
-
+            alert(MM.deviceConnected());
             if (MM.deviceType == "tablet") {
                 MM.panels.showLoading('right');
             }
@@ -452,7 +452,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         // fabrice setion name (weeks), index1 in row number in moodle alert( sections.name);
                    
                         var idx = -1;
-
+                        ///get current content id
                         $.each(sections.modules, function(index2, content){
                       
                             if(content.id==contentId) 
@@ -464,6 +464,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                  
                         var idxFound = false;
+                        ///get next content id in current section
                         $.each(sections.modules, function(index2, content){
 
                             if(idx==index2) 
@@ -475,19 +476,20 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             }
                         });
 
-
+                        //get next content id in next section
                         if(!idxFound)
                         {
                              
-                                  //  alert( section.name + " " + index);
+                                   
                             var nextSection = false;      
+                            //browse through sections
                             $.each(JSON.parse(JSON.stringify(contents)), function(index3, sections){    
 
-
+                                //if section has module and is next section
                               if(sections.modules && sections.modules.length >0 && index3 >  sectionId) {
 
                                 $.each(sections.modules, function(index2, content){ 
-                                    if(!nextSection)
+                                    if(!nextSection)//to stop on first loop i.e first content in section
                                     {
                                        // alert(courseId+ ","+sectionId+ ","+content.id + ","+ index3);                        
 
@@ -625,7 +627,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                 MM.handleFiles(linkCssId);
                                 if (open) {
                                     MM._openFile(fullpath);
-                                     MM.plugins.contents.downloadNextContentFile(courseId, sectionId, contentId, index);
+                                    MM.plugins.contents.saveStats(courseId, sectionId, contentId, false);
+                                    MM.plugins.contents.downloadNextContentFile(courseId, sectionId, contentId, index);
                                 }
                             }
                             if (typeof successCallback == "function") {
@@ -648,6 +651,29 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 });
             });
         },
+
+        saveStats: function(courseId, sectionId, contentId, automated)
+            {
+
+                var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
+
+                var stats = {            
+                'id':  MM.config.current_site.id + "-" + courseId, 
+                'sectionId': sectionId,
+                'courseId': courseId,
+                'contentId': contentId,
+                'content': content,             
+                'accesslinks':   { 
+                    'url':content.contents[0].fileurl, 
+                    'filename':content.contents[0].filename,
+                    'automated' : automated,
+                    'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
+                    'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
+                    'timestamp': new Date().toLocaleString() 
+                    }           
+                };
+ 
+            },
 
 
         downloadContentFileBg: function(courseId, sectionId, contentId, index, open, background, successCallback, errorCallback) {
@@ -677,26 +703,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 index = 0;
             }
 
- 
-
-               var stats = {            
-                'id':  MM.config.current_site.id + "-" + courseId, 
-                'sectionId': sectionId,
-                'courseId': courseId,
-                'contentId': contentId,
-                'content': content,
-                'test': 'test1',
-                'accesslinks':   { 
-                    'url':content.contents[0].fileurl, 
-                    'filename':content.contents[0].filename,
-                    'automated' : background,
-                    'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
-                    'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
-                    'timestamp': new Date().toLocaleString() 
-                }           
-            };
-
-         background = background || false;
+                      
 
  
 
@@ -737,6 +744,9 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                 }*/
                             }
                             if (typeof successCallback == "function") {
+
+                                MM.plugins.contents.saveStats(courseId, sectionId, contentId, true);
+
                                 successCallback(index, fullpath, path.file, downloadTime);
                             }
                         },
