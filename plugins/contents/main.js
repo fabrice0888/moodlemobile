@@ -59,8 +59,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 };
                 var html = MM.tpl.render(MM.plugins.contents.templates.sections.html, tpl);
 
-                pageTitle = course.get("shortname");
-
+                pageTitle = course.get("shortname");              
+                  
                 MM.panels.show("center", html, {title: pageTitle});
                 if (MM.deviceType == "tablet" && contents.length > 0) {
                     // First section.
@@ -208,7 +208,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                     }
                                     sections.modules[index2].downloaded = downloaded;
                                 }
-   alert("contentid:" + content.contentid+ " courseid: "+  courseId+ "name:" +content.name + "dwn: " +downloaded );
+  // alert("contentid:" + content.contentid+ " courseid: "+  courseId+ "name:" +content.name + "dwn: " +downloaded );
                                 // Check if our stored information has changed remotely.
                                 var updateContentInDB = false;
                                 var contentElements = ['filename', 'fileurl' , 'filesize',
@@ -389,6 +389,27 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             //////////////////
 
 
+            // Now we check if we have to alert the user that is about to download a large file.
+            if (file.filesize) {
+                // filesize is in bytes.
+                var filesize = parseInt(file.filesize);
+                if (filesize > FILE_SIZE_WARNING[MM.deviceType]) {
+                    var notice = MM.lang.s("noticelargefile");
+                    notice += " " + MM.lang.s("filesize") + " " + MM.util.bytesToSize(filesize, 2) + "<br />";
+                    notice += MM.lang.s("confirmcontinuedownload");
+
+                    MM.popConfirm(notice, function() {
+                        MM.plugins.contents.downloadContentFile(courseId, sectionId, contentId, index, true);
+                    });
+                    return;
+                }
+            }
+            MM.plugins.contents.downloadContentFile(courseId, sectionId, contentId, index, true);
+        },
+
+        downloadNextContentFile: function(courseId, sectionId, contentId, index){
+
+
              var sectionName="";
             var sectionNumber = 0;
             if (sectionId > 0) {
@@ -420,37 +441,70 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                     
                     $.each(JSON.parse(JSON.stringify(contents)), function(index1, sections){
-                        // Skip sections deleting contents..
+                      
+                         // Skip sections deleting contents..
                         if (sectionId > -1 && sectionId != index1) {
                             // This is a continue.
                             return true;
                         }
+
                         sectionName = sections.name;
                         // fabrice setion name (weeks), index1 in row number in moodle alert( sections.name);
-                        
-                        var idx = 0;
+                   
+                        var idx = -1;
 
                         $.each(sections.modules, function(index2, content){
-
+                      
                             if(content.id==contentId) 
                             {
                                 idx = index2 + 1;
-                                 
+                            
                             }
                         });
 
                  
-
+                        var idxFound = false;
                         $.each(sections.modules, function(index2, content){
 
                             if(idx==index2) 
-                            {
-                                
-                                MM.plugins.contents.downloadContentFileBg(courseId, sectionId, content.id, index, true);
+                            {//alert("wa" + content.id + "wa" +idx )
+                                idxFound=true;
+                                MM.plugins.contents.downloadContentFileBg(courseId, index2, content.id, index, true);
+                                return;
 
                             }
                         });
 
+
+                        if(!idxFound)
+                        {
+                             
+                                  //  alert( section.name + " " + index);
+                            var nextSection = false;      
+                            $.each(JSON.parse(JSON.stringify(contents)), function(index3, sections){    
+
+
+                              if(sections.modules && sections.modules.length >0 && index3 >  sectionId) {
+
+                                $.each(sections.modules, function(index2, content){ 
+                                    if(!nextSection)
+                                    {
+                                       // alert(courseId+ ","+sectionId+ ","+content.id + ","+ index3);                        
+
+                                        MM.plugins.contents.downloadContentFileBg(courseId, index3, content.id, index, true);
+                                        nextSection = true;
+                                        return;
+                                     }
+
+                                });
+
+
+                            }
+
+                            });
+
+                            
+                        }
 
 
 
@@ -460,22 +514,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
 
 
-            // Now we check if we have to alert the user that is about to download a large file.
-            if (file.filesize) {
-                // filesize is in bytes.
-                var filesize = parseInt(file.filesize);
-                if (filesize > FILE_SIZE_WARNING[MM.deviceType]) {
-                    var notice = MM.lang.s("noticelargefile");
-                    notice += " " + MM.lang.s("filesize") + " " + MM.util.bytesToSize(filesize, 2) + "<br />";
-                    notice += MM.lang.s("confirmcontinuedownload");
 
-                    MM.popConfirm(notice, function() {
-                        MM.plugins.contents.downloadContentFile(courseId, sectionId, contentId, index, true);
-                    });
-                    return;
-                }
-            }
-            MM.plugins.contents.downloadContentFile(courseId, sectionId, contentId, index, true);
         },
 
         downloadContentFile: function(courseId, sectionId, contentId, index, open, background, successCallback, errorCallback) {
@@ -586,10 +625,13 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                 MM.handleFiles(linkCssId);
                                 if (open) {
                                     MM._openFile(fullpath);
+                                     MM.plugins.contents.downloadNextContentFile(courseId, sectionId, contentId, index);
                                 }
                             }
                             if (typeof successCallback == "function") {
                                 successCallback(index, fullpath, path.file, downloadTime);
+
+                                
                             }
                         },
                         function(fullpath) {
@@ -610,10 +652,19 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
         downloadContentFileBg: function(courseId, sectionId, contentId, index, open, background, successCallback, errorCallback) {
 
+
             open = open || false;
             background = background || false;
-
+            //alert(MM.config.current_site.id + " + " +contentId);
             var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
+
+            if (typeof(content) == "undefined")
+            {
+                MM.plugins.contents.viewCourseContentsSection(courseId, sectionId) ;
+                content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
+            }
+
+           // alert(content);
             content = content.toJSON();
 
             var downCssId = "#download-" + contentId;
