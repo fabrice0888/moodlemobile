@@ -4,11 +4,11 @@
         xmlns:android = "http://schemas.android.com/apk/res/android"
         id        = "net.moodle.mmOffline"
         versionCode = "1"
-        version   = "1.01">
-    <name>Foodle Mobile</name>
+        version   = "1.00">
+    <name>Moodle Mobile</name>
 
     <description>
-        Foodle Mobile official app
+        Moodle Mobile official app
     </description>
 
     <author href="http://moodle.com" email="fabrice0888@moodle.com">

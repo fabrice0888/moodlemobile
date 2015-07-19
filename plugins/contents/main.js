@@ -87,7 +87,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
 
         viewCourseContentsSection: function(courseId, sectionId) {
-          
+            alert(MM.deviceConnected());
             if (MM.deviceType == "tablet") {
                 MM.panels.showLoading('right');
             }
@@ -144,7 +144,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             content.id = MM.config.current_site.id + "-" + content.contentid;
 
                           //fabrice here display the file name  alert(content.name)
-                          alert("url:" + content.contents[0].fileurl);// url of file
+                          //alert("url:" + content.contents[0].fileurl);// url of file
                            // alert(content.contents[0].filesize);
 
                            
@@ -548,7 +548,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
           //  if (typeof(automated) == "undefined" ) {
            //     automated = true;
           //  }
-/*
+
                var stats = {            
                 'id':  MM.config.current_site.id + "-" + courseId, 
                 'sectionId': sectionId,
@@ -566,7 +566,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 }           
             };
 
-         background = background || false;*/
+         background = background || false;
 
 
 //alert("passed in" + stats.accesslinks.date);
