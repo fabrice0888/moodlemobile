@@ -29,8 +29,19 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             ["course/contents/:courseid/section/:sectionId", "course_contents_section", "viewCourseContentsSection"],
             ["course/contents/:courseid/section/:sectionId/folder/:contentid/sectionname/:sectionname", "course_contents_folder", "viewFolder"],
             ["course/contents/:courseid/section/:sectionId/download/:contentid", "course_contents_download", "downloadContent"],
-            ["course/contents/:courseid/section/:sectionId/download/:contentid/:index", "course_contents_download_folder", "downloadContent"]
+            ["course/contents/:courseid/section/:sectionId/download/:contentid/:index", "course_contents_download_folder", "downloadContent"],
+            ["course/contents/link/:linkId", "course_contents_link", "openContent"]
         ],
+
+
+         openContent: function(linkId) {
+
+            alert("wawa");
+            MM._openFile(linkId);
+         },
+
+
+
 
         viewCourseContents: function(courseId) {
 
