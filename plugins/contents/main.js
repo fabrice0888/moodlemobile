@@ -452,7 +452,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         // fabrice setion name (weeks), index1 in row number in moodle alert( sections.name);
                    
                         var idx = -1;
-
+                         // go to the current contentid   
                         $.each(sections.modules, function(index2, content){
                       
                             if(content.id==contentId) 
@@ -462,7 +462,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             }
                         });
 
-                 
+                        //go to the next contentid in the current section
                         var idxFound = false;
                         $.each(sections.modules, function(index2, content){
 
@@ -475,7 +475,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             }
                         });
 
-
+                        //if next contentid not found in current section, search in next section
                         if(!idxFound)
                         {
                              
@@ -483,11 +483,11 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             var nextSection = false;      
                             $.each(JSON.parse(JSON.stringify(contents)), function(index3, sections){    
 
-
+                                //if section has modules and sectionid if the next sectionid
                               if(sections.modules && sections.modules.length >0 && index3 >  sectionId) {
 
                                 $.each(sections.modules, function(index2, content){ 
-                                    if(!nextSection)
+                                    if(!nextSection)//get only first contentid of next section
                                     {
                                        // alert(courseId+ ","+sectionId+ ","+content.id + ","+ index3);                        
 
@@ -535,64 +535,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 index = 0;
             }
 
-
-            /// fabrice 
-
-           // var course = MM.db.get("courses", MM.config.current_site.id + "-" + courseId);
-
-            //alert( course.toJSON()   );
-           // alert(JSON.parse(JSON.stringify(course)));
-
-          //  if (typeof(automated) == "undefined" ) {
-           //     automated = true;
-          //  }
-
-               var stats = {            
-                'id':  MM.config.current_site.id + "-" + courseId, 
-                'sectionId': sectionId,
-                'courseId': courseId,
-                'contentId': contentId,
-                'content': content,
-                'test': 'test1',
-                'accesslinks':   { 
-                    'url':content.contents[0].fileurl, 
-                    'filename':content.contents[0].filename,
-                    'automated' : background,
-                    'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
-                    'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
-                    'timestamp': new Date().toLocaleString() 
-                }           
-            };
-
-         background = background || false;
-
-
-//alert("passed in" + stats.accesslinks.date);
-//alert(stats.content.contents[0].fileurl);
-           
-
-          
-/*
-            MM.db.insert("mmStats", stats);
-
-            var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId); 
-            alert( result.get("contentId") +  result.get("test") );
-                
-            stats.test = "test3";     
-            MM.db.insert("mmStats", stats);
-
-            stats.id =  MM.config.current_site.id + "-" + courseId + "b";
-            stats.test = "anotehr rec";     
-            MM.db.insert("mmStats", stats);
-
-            var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId); 
-            alert( result.get("contentId") +  result.get("test") );
-           
-            var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + courseId + "b"); 
-            alert( result.get("contentId") +  result.get("test") );*/
-
-            ////////////
-
+ 
             var file = content.contents[index];
             var downloadURL = file.fileurl + "&token=" + MM.config.current_token;
            
@@ -625,7 +568,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                 MM.handleFiles(linkCssId);
                                 if (open) {
                                     MM._openFile(fullpath);
-                                     MM.plugins.contents.downloadNextContentFile(courseId, sectionId, contentId, index);
+                                    MM.plugins.contents.downloadNextContentFile(courseId, sectionId, contentId, index);
                                 }
                             }
                             if (typeof successCallback == "function") {
@@ -658,7 +601,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             //alert(MM.config.current_site.id + " + " +contentId);
             var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
 
-            if (typeof(content) == "undefined")
+            if (typeof(content) == "undefined")//no info about the course in db since not passed yet, to fetch on moodle
             {
                 MM.plugins.contents.viewCourseContentsSection(courseId, sectionId) ;
                 content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
@@ -678,28 +621,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             }
 
  
-
-               var stats = {            
-                'id':  MM.config.current_site.id + "-" + courseId, 
-                'sectionId': sectionId,
-                'courseId': courseId,
-                'contentId': contentId,
-                'content': content,
-                'test': 'test1',
-                'accesslinks':   { 
-                    'url':content.contents[0].fileurl, 
-                    'filename':content.contents[0].filename,
-                    'automated' : background,
-                    'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
-                    'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
-                    'timestamp': new Date().toLocaleString() 
-                }           
-            };
-
-         background = background || false;
-
  
-
             ////////////
 
             var file = content.contents[index];
@@ -755,6 +677,28 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             });
         },
 
+         saveStats: function(courseId, sectionId, contentId, automated)
+            {
+
+                var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
+
+                var stats = {            
+                'id':  MM.config.current_site.id + "-" + courseId, 
+                'sectionId': sectionId,
+                'courseId': courseId,
+                'contentId': contentId,
+                'content': content,             
+                'accesslinks':   { 
+                    'url':content.contents[0].fileurl, 
+                    'filename':content.contents[0].filename,
+                    'automated' : automated,
+                    'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
+                    'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
+                    'timestamp': new Date().toLocaleString() 
+                    }           
+                };
+ 
+            },
 
         viewFolder: function(courseId, sectionId, contentId, sectionName) {
 
