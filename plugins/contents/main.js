@@ -352,7 +352,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                       // Show info content modal window.
                    $(".link-stats", "#panel-right").on(MM.quickClick, function(e) {
                         //alert($(this).data("content"));                  
-                       MM.plugins.contents.downloadNextContentFile($(this).data("course"), $(this).data("section"), $(this).data("content"), index);
+                       MM.plugins.contents.downloadNextContentFile($(this).data("course"), $(this).data("section"), $(this).data("content"), 0);
                     }); 
 
 
@@ -482,7 +482,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             {//alert("wa" + content.id + "wa" +idx )
                                 idxFound=true;
 
-                                if(!content[index2].downloaded )
+                                if(!content.content[index2].downloaded )
                                     MM.plugins.contents.downloadContentFileBg(courseId, index2, content.id, index, true);
                                 return;
 
@@ -504,7 +504,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                     if(!nextSection)//get only first contentid of next section
                                     {
                                        // alert(courseId+ ","+sectionId+ ","+content.id + ","+ index3);                        
-                                        if(!content[index2].downloaded )
+                                        if(!content.content[index2].downloaded )
                                             MM.plugins.contents.downloadContentFileBg(courseId, index3, content.id, index, true);
                                         nextSection = true;
                                         return;
