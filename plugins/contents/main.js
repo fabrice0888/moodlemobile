@@ -338,6 +338,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                     // Show info content modal window.
                     $(".content-info", "#panel-right").on(MM.quickClick, function(e) {
+ 
                         MM.plugins.contents.infoContent(
                             e,
                             $(this).data("course"),
@@ -345,6 +346,15 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             $(this).data("content"),
                             -1);
                     });
+
+
+
+                      // Show info content modal window.
+                   $(".link-stats", "#panel-right").on(MM.quickClick, function(e) {
+                        //alert($(this).data("content"));                  
+                       MM.plugins.contents.downloadNextContentFile($(this).data("course"), $(this).data("section"), $(this).data("content"), index);
+                    }); 
+
 
                     // Show info for sections.
                     $("h3", "#panel-right").on(MM.quickClick, function(e) {
@@ -465,12 +475,15 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                         //go to the next contentid in the current section
                         var idxFound = false;
+                      
                         $.each(sections.modules, function(index2, content){
 
                             if(idx==index2) 
                             {//alert("wa" + content.id + "wa" +idx )
                                 idxFound=true;
-                                MM.plugins.contents.downloadContentFileBg(courseId, index2, content.id, index, true);
+
+                                if(!content[index2].downloaded )
+                                    MM.plugins.contents.downloadContentFileBg(courseId, index2, content.id, index, true);
                                 return;
 
                             }
@@ -491,8 +504,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                     if(!nextSection)//get only first contentid of next section
                                     {
                                        // alert(courseId+ ","+sectionId+ ","+content.id + ","+ index3);                        
-
-                                        MM.plugins.contents.downloadContentFileBg(courseId, index3, content.id, index, true);
+                                        if(!content[index2].downloaded )
+                                            MM.plugins.contents.downloadContentFileBg(courseId, index3, content.id, index, true);
                                         nextSection = true;
                                         return;
                                      }
@@ -739,7 +752,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
             // Show info content modal window.
             $(".content-info", "#panel-right").on(MM.quickClick, function(e) {
-
+ 
                 MM.plugins.contents.infoContent(
                     e,
                     $(this).data("course"),
@@ -748,14 +761,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                     $(this).data("index"));
             });
 
-
-              // Show info content modal window.
-            $(".link-stats", "#panel-right").on(MM.quickClick, function(e) {
-
-               alert("sdfsdf");
-            });
-
-            // Logging.
+             // Logging.
             if (parseInt(content.instance) > 0) {
                 MM.moodleLogging(
                     'mod_folder_view_folder',
@@ -769,9 +775,10 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             }
         },
 
-        infoContent: function(e, courseId, sectionId, contentId, index) {
 
-            e.preventDefault();
+        infoContent: function(e, courseId, sectionId, contentId, index) {
+        
+            e.preventDefault(); 
             var i = {
                 left: e.pageX - 5,
                 top: e.pageY
