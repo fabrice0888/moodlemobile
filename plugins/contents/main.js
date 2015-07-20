@@ -450,6 +450,11 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                     var firstContent = 0;
 
+                    var contentsStored = [];
+                    MM.db.each("contents", function(el){
+                        contentsStored.push(el.get("id"));                      
+                    });
+
                     
                     $.each(JSON.parse(JSON.stringify(contents)), function(index1, sections){
                       
@@ -482,7 +487,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             {//alert("wa" + content.id + "wa" +idx )
                                 idxFound=true;
 
-                                if(!content.content[index2].downloaded )
+                                if (contentsStored.indexOf(content.id) == -1)
                                     MM.plugins.contents.downloadContentFileBg(courseId, index2, content.id, index, true);
                                 return;
 
@@ -504,7 +509,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                     if(!nextSection)//get only first contentid of next section
                                     {
                                        // alert(courseId+ ","+sectionId+ ","+content.id + ","+ index3);                        
-                                        if(!content.content[index2].downloaded )
+                                       if (contentsStored.indexOf(content.id) == -1)
                                             MM.plugins.contents.downloadContentFileBg(courseId, index3, content.id, index, true);
                                         nextSection = true;
                                         return;
