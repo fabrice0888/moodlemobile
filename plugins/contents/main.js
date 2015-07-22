@@ -351,7 +351,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                       // Show info content modal window.
                    $(".link-stats", "#panel-right").on(MM.quickClick, function(e) {
-                        //alert($(this).data("content"));                  
+                        //alert($(this).data("content"));  
+                                  
                        MM.plugins.contents.downloadNextContentFile($(this).data("course"), $(this).data("section"), $(this).data("content"), 0);
                     }); 
 
@@ -381,6 +382,237 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 }
             );
         },
+
+         viewCourseContentsSectionBg: function(courseId, sectionId) {
+ 
+
+            var sectionName = "";
+
+            // This is used in the logging WS call.
+            var sectionNumber = 0;
+            if (sectionId > 0) {
+                sectionNumber = sectionId;
+            }
+
+            // We do the logging here and not using preSets because the following core_course_get_contents call is cached.
+            MM.moodleLogging(
+                'core_course_view_course',
+                {
+                    courseid: courseId,
+                    sectionnumber: sectionNumber
+                }
+            );
+
+            var data = {
+                'courseid': courseId
+            };
+
+            MM.moodleWSCall(
+                'core_course_get_contents',
+                data,
+                function(contents) {
+                    var course = MM.db.get("courses", MM.config.current_site.id + "-" + courseId);
+                    var courseName = course.get("fullname");
+
+                    var firstContent = 0;
+
+                    var contentsStored = [];
+                    MM.db.each("contents", function(el){
+                        contentsStored.push(el.get("id"));                      
+                    });
+
+                    var finalContents = [];
+                    $.each(JSON.parse(JSON.stringify(contents)), function(index1, sections){
+                        // Skip sections deleting contents..
+                        if (sectionId > -1 && sectionId != index1) {
+                            // This is a continue.
+                            return true;
+                        }
+                        sectionName = sections.name;
+             
+ 
+                        $.each(sections.modules, function(index2, content){
+
+                            content.contentid = content.id;
+                            content.courseid = courseId;
+                            content.id = MM.config.current_site.id + "-" + content.contentid;                           
+
+
+                            if(!firstContent) {
+                                firstContent = content.contentid;
+                            }
+
+                            // Check if has multiple files.
+                            if (content.modname == "folder" ||
+                                    (content.contents && content.contents.length > 1)) {
+                                sections.modules[index2].multiplefiles = true;
+                            }
+
+                            // Check if is a resource URL.
+                            if (content.modname == "url" &&
+                                    content.contents && content.contents.length > 0 &&
+                                    content.contents[0].fileurl) {
+
+                                sections.modules[index2].fileurl = content.contents[0].fileurl;
+                            }
+
+                            // The file/s was/were downloaded.
+                            var downloaded = false;
+
+                            // This content is currently in the database.
+                            if (contentsStored.indexOf(content.id) > -1) {
+                                var c = MM.db.get("contents", content.id);
+                                c = c.toJSON();
+                                sections.modules[index2].mainExtension = c.mainExtension;
+                                sections.modules[index2].webOnly = c.webOnly;
+
+                                if (c.contents) {
+                                    $.each(c.contents, function (index5, filep) {
+                                        if (typeof(filep.localpath) != "undefined" &&
+                                                typeof(sections.modules[index2].contents[index5]) != "undefined") {
+
+                                            sections.modules[index2].contents[index5].localpath = filep.localpath;
+                                        }
+                                    });
+                                }
+
+                                if (!sections.modules[index2].webOnly) {
+                                    if (c.contents && c.contents[0]) {
+                                        var extension = MM.util.getFileExtension(c.contents[0].filename);
+
+                                        if (c.contents.length == 1 || (content.modname == "resource" && extension != "html" && extension != "htm")) {
+                                            var cFile = c.contents[0];
+                                            downloaded = typeof(cFile.localpath) != "undefined";
+                                        } else {
+                                            downloaded = true;
+                                            if (c.contents) {
+                                                $.each(c.contents, function (index5, filep) {
+                                                    if (typeof(filep.localpath) == "undefined") {
+                                                        downloaded = false;
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+                                    sections.modules[index2].downloaded = downloaded;
+                                }
+ 
+                                // Check if our stored information has changed remotely.
+                                var updateContentInDB = false;
+                                var contentElements = ['filename', 'fileurl' , 'filesize',
+                                    'timecreated', 'timemodified', 'author', 'license'];
+
+                                for (var indexEl in c.contents) {
+                                    _.each(contentElements, function(el) {
+                                        if (typeof(c.contents[indexEl][el]) != "undefined" &&
+                                            typeof(content.contents[indexEl]) != "undefined" &&
+                                            typeof(content.contents[indexEl][el]) != "undefined" &&
+                                            c.contents[indexEl][el] != content.contents[indexEl][el]
+                                            ) {
+                                            updateContentInDB = true;
+                                            c.contents[indexEl][el] = content.contents[indexEl][el];
+                                        }
+                                    });
+                                }
+
+                                // Check file additions.
+                                for (var indexEl in content.contents) {
+                                    if (typeof c.contents[indexEl] == "undefined") {
+                                        updateContentInDB = true;
+                                        c.contents[indexEl] = content.contents[indexEl];
+                                    }
+                                }
+
+                                // Check if the content name has changed.
+                                if (c.name != content.name) {
+                                    c.name = content.name;
+                                    updateContentInDB = true;
+                                }
+
+                                // Labels should be allways updated (the description may change).
+                                if (c.modname == "label") {
+                                    c.description = content.description;
+                                    updateContentInDB = true;
+                                }
+
+                                if (updateContentInDB) {
+                                    MM.db.insert("contents", c);
+                                }
+
+                                return true; // This is a continue;
+                            }
+
+                            // The mod url also exports contents but are external contents not downloadable by the app.
+                            var modContents = ["folder","page","resource"];
+
+                            if (modContents.indexOf(content.modname) == -1) {
+                                content.webOnly = true;
+                            } else {
+                                content.webOnly = false;
+                            }
+                            sections.modules[index2].webOnly = content.webOnly;
+
+                            MM.db.insert("contents", content);
+
+                       
+                     
+                            // Sync content files.
+
+                            if (typeof(content.contents) != "undefined") {
+                                $.each(content.contents, function (index3, file) {
+
+                                    if (typeof file.fileurl == "undefined" || !file.fileurl) {
+                                        return true;
+                                    }
+
+                                    if (file.fileurl.indexOf(MM.config.current_site.siteurl) == -1) {
+                                        return true;
+                                    }
+
+                                    var paths = MM.plugins.contents.getLocalPaths(courseId, content.contentid, file);
+
+                                    var el = {
+                                        id: hex_md5(MM.config.current_site.id + file.fileurl),
+                                        url: file.fileurl,
+                                        path: paths.directory,
+                                        newfile: paths.file,
+                                        contentid: content.id,
+                                        index: index3,
+                                        syncData: {
+                                            name: MM.lang.s("content") + ": " + courseName + ": " + content.name,
+                                            description: file.fileurl
+                                        },
+                                        siteid: MM.config.current_site.id,
+                                        type: "content"
+                                       };
+
+                                    // Disabled auto sync temporaly
+                                    //MM.log("Sync: Adding content: " + el.syncData.name + ": " + el.url);
+                                    //MM.db.insert("sync", el);
+
+                                    if (file.filename) {
+                                        var extension = file.filename.substr(file.filename.lastIndexOf(".") + 1);
+
+                                        // Exception for folder type, we use the resource icon.
+                                        if (content.modname != "folder" && typeof(MM.plugins.contents.templates.mimetypes[extension]) != "undefined") {
+                                            sections.modules[index2].mainExtension = MM.plugins.contents.templates.mimetypes[extension]["icon"];
+                                            content.mainExtension = sections.modules[index2].mainExtension;
+                                            MM.db.insert("contents", content);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+
+                        finalContents.push(sections);
+
+                    });           
+
+                   
+                }
+            );
+        },
+
 
         downloadContent: function(courseId, sectionId, contentId, index){
             var file;
@@ -420,7 +652,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
         downloadNextContentFile: function(courseId, sectionId, contentId, index){
 
-
+           
              var sectionName="";
             var sectionNumber = 0;
             if (sectionId > 0) {
@@ -538,6 +770,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
         downloadContentFile: function(courseId, sectionId, contentId, index, open, background, successCallback, errorCallback) {
 
+            MM.plugins.contents.saveStats(courseId,sectionId, contentId, false) ;  
+
             open = open || false;
             background = background || false;
 
@@ -614,6 +848,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
         downloadContentFileBg: function(courseId, sectionId, contentId, index, open, background, successCallback, errorCallback) {
 
+            MM.plugins.contents.saveStats(courseId,sectionId, contentId, true) ;  
 
             open = open || false;
             background = background || false;
@@ -622,7 +857,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
             if (typeof(content) == "undefined")//no info about the course in db since not passed yet, to fetch on moodle
             {
-                MM.plugins.contents.viewCourseContentsSection(courseId, sectionId) ;
+                MM.plugins.contents.viewCourseContentsSectionBg(courseId, sectionId) ;
                 content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
             }
 
@@ -701,22 +936,68 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                 var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
 
+                if (typeof(content) == "undefined")//no info about the course in db since not passed yet, to fetch on moodle
+                {
+                    MM.plugins.contents.viewCourseContentsSectionBg(courseId, sectionId) ;
+                    content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
+                }
+
+               // alert(content);
+                content = content.toJSON();
+
+
                 var stats = {            
-                'id':  MM.config.current_site.id + "-" + courseId, 
+                'id':  MM.config.current_site.id + "-" + contentId, 
                 'sectionId': sectionId,
                 'courseId': courseId,
                 'contentId': contentId,
-                'content': content,             
+                'content': content,    
+                'automated' : automated,         
                 'accesslinks':   { 
                     'url':content.contents[0].fileurl, 
-                    'filename':content.contents[0].filename,
-                    'automated' : automated,
+                    'filename':content.contents[0].filename,                    
                     'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
                     'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
                     'timestamp': new Date().toLocaleString() 
                     }           
                 };
- 
+
+               var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + contentId); 
+              // result.get("contentId")     
+               if( typeof(result) == "undefined")                 
+               {
+                    MM.db.insert("mmStats", stats);
+               }
+               else
+               {
+                    var links = MM.db.where("mmStats", {'id': MM.config.current_site.id+ "-" + contentId, 'automated': true});   
+                    if ( links.length != 0)  
+                    {
+                               
+                           stats.automated = false;     
+                           stats.content.contents[0].time = MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'});
+                           stats.content.contents[0].date =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
+                           stats.content.contents[0].timestamp =  new Date().toLocaleString() ;
+
+                           MM.db.insert("mmStats", stats);
+
+
+                    }
+               
+               }
+
+
+
+             //  $.each(links, function(index, link) {
+                  //     MM.log("Content: Download of content ");
+              //    alert( link.get("id"));
+              //     });
+               
+                 MM.db.each("mmStats", function(el){
+                         MM.log(  el.get("id") + " "  + el.get("timestamp")   );                      
+                    }); 
+                     
+                
             },
 
         viewFolder: function(courseId, sectionId, contentId, sectionName) {
