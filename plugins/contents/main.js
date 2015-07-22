@@ -148,12 +148,23 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                           //alert("url:" + content.contents[0].fileurl);// url of file
                            // alert(content.contents[0].filesize);
 
-                           
+                         
+                         
+                           /*
+                           var timediff = new Date();
 
+                             alert(new Date() );
+
+                           var i = 0;
+                           while (i!=10000)
+                            i++;
+
+
+                            alert(new Date()-timediff );
 
                             if(!firstContent) {
                                 firstContent = content.contentid;
-                            }
+                            }*/
 
                             // Check if has multiple files.
                             if (content.modname == "folder" ||
@@ -958,7 +969,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                     'filename':content.contents[0].filename,                    
                     'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
                     'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
-                    'timestamp': new Date().toLocaleString() 
+                    'timestamp': new Date() 
                     }           
                 };
 
@@ -977,7 +988,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                            stats.automated = false;     
                            stats.content.contents[0].time = MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'});
                            stats.content.contents[0].date =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
-                           stats.content.contents[0].timestamp =  new Date().toLocaleString() ;
+                           stats.content.contents[0].timestamp =  new Date();
 
                            MM.db.insert("mmStats", stats);
 
@@ -994,7 +1005,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
               //     });
                
                  MM.db.each("mmStats", function(el){
-                         MM.log(  el.get("id") + " "  + el.get("timestamp")   );                      
+                         MM.log(  el.get("courseId") + "--"  + el.get("timestamp")   );                      
                     }); 
                      
                 
