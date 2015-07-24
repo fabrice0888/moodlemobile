@@ -664,7 +664,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
         downloadNextContentFile: function(courseId, sectionId, contentId, index){
 
            
-             var sectionName="";
+            var sectionName="";
             var sectionNumber = 0;
             if (sectionId > 0) {
                 sectionNumber = sectionId;
@@ -944,7 +944,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
          saveStats: function(courseId, sectionId, contentId, automated)
             {
-
+               //setInterval(function () {alert("Hello")}, 3000);
                 var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
 
                 if (typeof(content) == "undefined")//no info about the course in db since not passed yet, to fetch on moodle
@@ -953,7 +953,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                     content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
                 }
 
-               // alert(content);
+        
                 content = content.toJSON();
 
 
@@ -964,49 +964,118 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 'contentId': contentId,
                 'content': content,    
                 'automated' : automated,         
-                'accesslinks':   { 
+              //  'accesslinks':   { 
                     'url':content.contents[0].fileurl, 
                     'filename':content.contents[0].filename,                    
                     'time':MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'}),
                     'date' : MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'}),
-                    'timestamp': new Date() 
-                    }           
+                    'timestamp': new Date(),
+                    'lastaccesstimestamp':   new Date(),
+                    'lastaccessdate':   MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'})
+                 //   }           
                 };
 
                var result = MM.db.get("mmStats", MM.config.current_site.id + "-" + contentId); 
-              // result.get("contentId")     
+   
                if( typeof(result) == "undefined")                 
-               {
+               {  
                     MM.db.insert("mmStats", stats);
                }
                else
                {
                     var links = MM.db.where("mmStats", {'id': MM.config.current_site.id+ "-" + contentId, 'automated': true});   
+
+               
                     if ( links.length != 0)  
                     {
-                               
-                           stats.automated = false;     
-                           stats.content.contents[0].time = MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'});
-                           stats.content.contents[0].date =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
-                           stats.content.contents[0].timestamp =  new Date();
+                        $.each(links, function(index, links) {
+                           links = links.toJSON();
 
-                           MM.db.insert("mmStats", stats);
+                           links.automated = false;     
+                           links.time = MM.util.toLocaleTimeString(new Date(), MM.lang.current, {hour: '2-digit', minute:'2-digit'});
+                           links.date =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
+                           links.timestamp =  new Date() ;    
+                           links.lastaccesstimestamp =  new Date() ;                       
+                           links.lastaccessdate =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
 
+                           MM.db.insert("mmStats", links);
+                       });
 
                     }
+
+                    links = MM.db.where("mmStats", {'id': MM.config.current_site.id+ "-" + contentId, 'automated': false});  
+                    
+                    if ( links.length != 0)  
+                    {   
+                        $.each(links, function(index, links) {
+                       
+                             links = links.toJSON();
+                                
+                             links.lastaccesstimestamp =  new Date() ;    
+                             links.lastaccessdate =   MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
+                             MM.db.insert("mmStats", links);
+                                   
+                         });         
+                    }
+                    
+
+                    
                
                }
 
+             
 
+              var lastDate =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
+              var searchinfo = MM.db.where("mmStats", {'courseId': courseId, 'automated': false,  'lastaccessdate': lastDate      });   
+                
+              var minTime =new Date() ;
+              var maxTime = new Date() ; 
+              var temp;
+              var numCourses=0;
+              var curSectionId;
+              var curContentId;
+ 
+                 $.each(searchinfo, function(index, link) {
+                        link = link.toJSON();
+                   
+                        temp = new Date(link.lastaccesstimestamp );
 
-             //  $.each(links, function(index, link) {
-                  //     MM.log("Content: Download of content ");
-              //    alert( link.get("id"));
-              //     });
-               
+                        if (temp< minTime)
+                            minTime = temp;
+
+                        numCourses++;
+
+                  });
+
+                 maxTime = minTime;
+                 $.each(searchinfo, function(index, link) {
+                        link = link.toJSON();
+                        temp = new Date(link.lastaccesstimestamp );
+                        
+                        if (temp> maxTime)
+                        {
+                            maxTime = temp;
+                            curSectionId = link.SectionId ;
+                            curContentId = link.ContentId;
+                        }
+
+                  });  
+
+            // alert(maxTime);
+            // alert(minTime);
+            var diff = (maxTime-minTime)/1000;
+            alert(numCourses + " in " + diff);
+            alert("Avg: " + numCourses/diff  );
+
+            var remTime = 8*60*60*1000 - diff*numCourses;
+            var noCourseRemain = remTime * numCourses/diff ;
+               /*
                  MM.db.each("mmStats", function(el){
-                         MM.log(  el.get("courseId") + "--"  + el.get("timestamp")   );                      
-                    }); 
+                            el = el.toJSON();
+                        // MM.log(  el.courseId + "--"  + el.content.contents[0].timestamp  );  
+                     //   alert(  el.courseId + "-->"  + el.accesslinks.timestamp  ); 
+
+                    }); */
                      
                 
             },
