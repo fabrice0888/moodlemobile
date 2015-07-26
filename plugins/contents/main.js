@@ -663,6 +663,9 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
         downloadNextContentFile: function(courseId, sectionId, contentId, index){
 
+                    var nextSectionId=-1;
+                    var nextContentId=-1;
+                    
            
             var sectionName="";
             var sectionNumber = 0;
@@ -698,7 +701,6 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         contentsStored.push(el.get("id"));                      
                     });
 
-                    
                     $.each(JSON.parse(JSON.stringify(contents)), function(index1, sections){
                       
                          // Skip sections deleting contents..
@@ -723,15 +725,36 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                         //go to the next contentid in the current section
                         var idxFound = false;
-                      
+                      /*
                         $.each(sections.modules, function(index2, content){
 
                             if(idx==index2) 
-                            {//alert("wa" + content.id + "wa" +idx )
+                            {alert("wa" + content.id + "wa" +idx )
                                 idxFound=true;
 
                                 if (contentsStored.indexOf(content.id) == -1)
+                                {
+                                    nextContentId=content.id;
+                                    nextSectionId = index2;
                                     MM.plugins.contents.downloadContentFileBg(courseId, index2, content.id, index, true);
+                                }
+                                return;
+
+                            }
+                        });*/
+
+                        $.each(sections.modules, function(index2, content){
+
+                            if(idx==index2) 
+                            {//alert("wa" + idx + "wa" +content.id  + " sec" +sectionId  );
+                                idxFound=true;
+
+                                if (contentsStored.indexOf(content.id) == -1)
+                                {
+                                    nextContentId=content.id;
+                                    nextSectionId = sectionId;
+                                    MM.plugins.contents.downloadContentFileBg(courseId, sectionId, content.id, index, true);
+                                }
                                 return;
 
                             }
@@ -753,7 +776,11 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                     {
                                        // alert(courseId+ ","+sectionId+ ","+content.id + ","+ index3);                        
                                        if (contentsStored.indexOf(content.id) == -1)
+                                       {    
+                                            nextContentId=content.id;                                            
+                                            nextSectionId = index3;
                                             MM.plugins.contents.downloadContentFileBg(courseId, index3, content.id, index, true);
+                                        }
                                         nextSection = true;
                                         return;
                                      }
@@ -768,14 +795,14 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             
                         }
 
-
+                     
 
                     });
     
             });
+              //  alert(nextSectionId + "-" + nextContentId);
 
-
-
+               return nextSectionId + "-" + nextContentId;
 
         },
 
@@ -1024,6 +1051,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                }
 
              
+              if(automated)
+                return;
 
               var lastDate =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
               var searchinfo = MM.db.where("mmStats", {'courseId': courseId, 'automated': false,  'lastaccessdate': lastDate      });   
@@ -1063,12 +1092,50 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
             // alert(maxTime);
             // alert(minTime);
-            var diff = (maxTime-minTime)/1000;
-            alert(numCourses + " in " + diff);
-            alert("Avg: " + numCourses/diff  );
+            var diff = (maxTime-minTime);
+          // alert(numCourses + " in " + diff);
+          //  alert("Avg: " + numCourses/diff  );
 
-            var remTime = 8*60*60*1000 - diff*numCourses;
-            var noCourseRemain = remTime * numCourses/diff ;
+            var noCoursePerMil = numCourses/diff;
+            var paramBuffer = 60*1000;
+
+            var coursesToGo = Math.ceil(paramBuffer * noCoursePerMil);
+
+            var i=0;
+
+           
+            var sectionIdL = sectionId;
+            var contentIdL =contentId;
+            var nextCourses;
+            var nextCoursesSplit;
+            alert("coursesToGo" + coursesToGo + "  " + sectionId +  " w " + contentIdL );
+
+            while(noCoursePerMil!=0 && diff!=0 && i<coursesToGo)
+            {
+
+               nextCourses =  MM.plugins.contents.downloadNextContentFile(courseId, sectionIdL, contentIdL, 0);
+               nextCoursesSplit =  nextCourses.split("-");
+               sectionIdL = nextCoursesSplit[0];
+               contentIdL = nextCoursesSplit[1];
+             //  alert(nextCoursesSplit[0] + " " +nextCoursesSplit[1] );
+
+               if(sectionIdL==-1 || contentIdL==-1 || sectionIdL.length==0 || contentIdL.length==0 )
+                    break;
+
+                //if(contentIdL==)
+                if(i>3)
+                    break;
+
+                i++;
+
+            }
+            //var txt = MM.plugins.contents.downloadNextContentFile(courseId, sectionId, contentId, 0);
+
+            //alert(txt);
+           // alert(coursesToGo);
+
+           // var remTime = 8*60*60*1000 - diff*numCourses;
+            //var noCourseRemain = remTime * numCourses/diff ;
                /*
                  MM.db.each("mmStats", function(el){
                             el = el.toJSON();
