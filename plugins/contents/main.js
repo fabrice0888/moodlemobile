@@ -1028,12 +1028,12 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                if(status=="Y")
                                 {
                                     links.linkAvailableCount =  links.linkAvailableCount + 1;
-                                    alert("Y" + links.linkAvailableCount);
+                                  //  alert("Y" + links.linkAvailableCount);
                                 }
                                 else
                                 {
                                     links.linkNonAvailableCount =  links.linkNonAvailableCount + 1;
-                                    alert("N" + links.linkNonAvailableCount);    
+                                  //  alert("N" + links.linkNonAvailableCount);    
                                 }
 
                                  MM.db.insert("mmEventStats", links);
@@ -1175,7 +1175,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                   });  
 
-            // alert(maxTime);
+             //alert(maxTime);
             // alert(minTime);
             var diff = (maxTime-minTime);
           // alert(numCourses + " in " + diff);
@@ -1185,6 +1185,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             var paramBuffer = 60*1000;
 
             var coursesToGo = Math.ceil(paramBuffer * noCoursePerMil);
+            // var coursesToGo =  paramBuffer * noCoursePerMil;
+
 
             var i=0;
 
@@ -1193,22 +1195,33 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             var contentIdL =contentId;
             var nextCourses;
             var nextCoursesSplit;
-          //  alert("coursesToGo" + coursesToGo + "  " + sectionId +  " w " + contentIdL );
+            //alert("coursesToGo" + coursesToGo + " noCoursePerMil: " + noCoursePerMil + " " + sectionIdL +  " w " + contentIdL );
+           // alert("diff" + diff);
 
-            while(noCoursePerMil!=0 && diff!=0 && i<coursesToGo)
+            if(diff==0) 
+            {
+      
+                return;
+            }                 
+                
+
+            while( diff!=0 && noCoursePerMil!=0 && i<coursesToGo)
             {
 
+           
                nextCourses =  MM.plugins.contents.downloadNextContentFile(courseId, sectionIdL, contentIdL, 0);
-               nextCoursesSplit =  nextCourses.split("-");
-               sectionIdL = nextCoursesSplit[0];
-               contentIdL = nextCoursesSplit[1];
+            
+               nextCoursesSplit =  nextCourses.split("-");  
+               sectionIdL = nextCoursesSplit[0]; 
+               contentIdL = nextCoursesSplit[1]; 
              //  alert(nextCoursesSplit[0] + " " +nextCoursesSplit[1] );
 
-               if(sectionIdL==-1 || contentIdL==-1 || sectionIdL.length==0 || contentIdL.length==0 )
+               //if(sectionIdL==-1 || contentIdL==-1 || sectionIdL.length==0 || contentIdL.length==0 )
+               if(nextCoursesSplit[0].length==0 || nextCoursesSplit[1].length==0 )
                     break;
 
                 //if(contentIdL==)
-                if(i>3)
+                if(i>=3)
                     break;
 
                 i++;
@@ -1232,12 +1245,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 
             },
 
-     checkConnection: function() {
-       
-     
-    },
-
-
+   
         viewFolder: function(courseId, sectionId, contentId, sectionName) {
 
             var course = MM.db.get("courses", MM.config.current_site.id + "-" + courseId);
