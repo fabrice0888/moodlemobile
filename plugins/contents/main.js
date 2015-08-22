@@ -991,7 +991,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             if( typeof(result) == "undefined")                 
                {  
 
-                  if("Y")
+                  if(status=="Y")
                    {    
 
                         var Eventstats = {            
@@ -1025,7 +1025,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             $.each(links, function(index, links) {
                                links = links.toJSON();
 
-                                if("Y")
+                               if(status=="Y")
                                 {
                                     links.linkAvailableCount =  links.linkAvailableCount + 1;
                                     alert("Y" + links.linkAvailableCount);
