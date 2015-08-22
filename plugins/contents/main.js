@@ -22,6 +22,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             contents: {type: "collection", model: "content"},
             mmStat:{type: "model"},
             mmStats: {type: "collection", model: "mmStat"},
+            mmEventStat:{type: "model"},
+            mmEventStats: {type: "collection", model: "mmEventStat"},
         },
 
         routes: [
@@ -363,6 +365,9 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                       // Show info content modal window.
                    $(".link-stats", "#panel-right").on(MM.quickClick, function(e) {
                         //alert($(this).data("content"));  
+
+                        //file available 
+                       MM.plugins.contents.saveEventStats("Y") ;  
                                   
                        MM.plugins.contents.downloadNextContentFile($(this).data("course"), $(this).data("section"), $(this).data("content"), 0);
                     }); 
@@ -861,6 +866,10 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                     MM._openFile(fullpath);
                                     MM.plugins.contents.downloadNextContentFile(courseId, sectionId, contentId, index);
                                 }
+
+
+                                //file available 
+                                MM.plugins.contents.saveEventStats("Y") ;  
                             }
                             if (typeof successCallback == "function") {
                                 successCallback(index, fullpath, path.file, downloadTime);
@@ -870,6 +879,12 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         },
                         function(fullpath) {
                             MM.log("Content: Error downloading " + fullpath + " URL: " + downloadURL);
+
+
+                            //file not available 
+
+                            MM.plugins.contents.saveEventStats("N") ;  
+
                             if ($(downCssId)) {
                                 $(downCssId).attr("src", "img/download.png");
                             }
@@ -969,8 +984,77 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             });
         },
 
+        saveEventStats: function(status)
+        {
+             var result = MM.db.get("mmEventStats", MM.config.current_site.id ); 
+
+            if( typeof(result) == "undefined")                 
+               {  
+
+                  if("Y")
+                   {    
+
+                        var Eventstats = {            
+                        'id':  MM.config.current_site.id  , 
+                        'linkAvailableCount':  1,
+                        'linkNonAvailableCount':   0
+                         
+                        };
+
+                    }
+                    else
+                    {
+                         var Eventstats = {            
+                        'id':  MM.config.current_site.id  , 
+                        'linkAvailableCount':  0,
+                        'linkNonAvailableCount':   1
+                         
+                        };
+
+                    } 
+
+                  MM.db.insert("mmEventStats", Eventstats);
+               }
+               else
+               {
+
+                      var links = MM.db.where("mmEventStats", {'id': MM.config.current_site.id });   
+
+                       if ( links.length != 0)  
+                        {
+                            $.each(links, function(index, links) {
+                               links = links.toJSON();
+
+                                if("Y")
+                                {
+                                    links.linkAvailableCount =  links.linkAvailableCount + 1;
+                                    alert(links.linkAvailableCount);
+                                }
+                                else
+                                {
+                                    links.linkNonAvailableCount =  links.linkNonAvailableCount + 1;
+                                    alert(links.linkAvailableCount);    
+                                }
+
+                                 MM.db.insert("mmEventStats", links);
+
+                           });
+                       
+
+                          
+
+                        }
+
+
+               } 
+
+        },
          saveStats: function(courseId, sectionId, contentId, automated)
             {
+
+                //var answer = MM.plugins.contents.checkConnection();
+              
+ 
                //setInterval(function () {alert("Hello")}, 3000);
                 var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
 
@@ -986,6 +1070,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                 var stats = {            
                 'id':  MM.config.current_site.id + "-" + contentId, 
+                'username':  MM.config.current_site.username,
                 'sectionId': sectionId,
                 'courseId': courseId,
                 'contentId': contentId,
@@ -1108,7 +1193,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             var contentIdL =contentId;
             var nextCourses;
             var nextCoursesSplit;
-            alert("coursesToGo" + coursesToGo + "  " + sectionId +  " w " + contentIdL );
+          //  alert("coursesToGo" + coursesToGo + "  " + sectionId +  " w " + contentIdL );
 
             while(noCoursePerMil!=0 && diff!=0 && i<coursesToGo)
             {
@@ -1146,6 +1231,12 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                      
                 
             },
+
+     checkConnection: function() {
+       
+     
+    },
+
 
         viewFolder: function(courseId, sectionId, contentId, sectionName) {
 
