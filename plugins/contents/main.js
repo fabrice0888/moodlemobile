@@ -1028,12 +1028,12 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                 if("Y")
                                 {
                                     links.linkAvailableCount =  links.linkAvailableCount + 1;
-                                    alert(links.linkAvailableCount);
+                                    alert("Y" + links.linkAvailableCount);
                                 }
                                 else
                                 {
                                     links.linkNonAvailableCount =  links.linkNonAvailableCount + 1;
-                                    alert(links.linkNonAvailableCount);    
+                                    alert("N" + links.linkNonAvailableCount);    
                                 }
 
                                  MM.db.insert("mmEventStats", links);
