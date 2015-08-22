@@ -1033,7 +1033,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                 else
                                 {
                                     links.linkNonAvailableCount =  links.linkNonAvailableCount + 1;
-                                    alert(links.linkAvailableCount);    
+                                    alert(links.linkNonAvailableCount);    
                                 }
 
                                  MM.db.insert("mmEventStats", links);
