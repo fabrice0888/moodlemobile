@@ -5,7 +5,26 @@ var templates = [
     "root/externallib/text!root/plugins/contents/mimetypes.json"
 ];
 
+
+
+var paramBuffer = 30000;
+var waitCount = 0;
+setInterval(function () {  
+
+
+    MM.setConfig('dev_offline', true); 
+
+    setInterval(function () {  MM.setConfig('dev_offline', false);  }, paramBuffer);
+
+
+ }, paramBuffer);
+
+
+
 define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
+
+    
+
     var plugin = {
         settings: {
             name: "contents",
@@ -730,23 +749,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                         //go to the next contentid in the current section
                         var idxFound = false;
-                      /*
-                        $.each(sections.modules, function(index2, content){
-
-                            if(idx==index2) 
-                            {alert("wa" + content.id + "wa" +idx )
-                                idxFound=true;
-
-                                if (contentsStored.indexOf(content.id) == -1)
-                                {
-                                    nextContentId=content.id;
-                                    nextSectionId = index2;
-                                    MM.plugins.contents.downloadContentFileBg(courseId, index2, content.id, index, true);
-                                }
-                                return;
-
-                            }
-                        });*/
+                   
 
                         $.each(sections.modules, function(index2, content){
 
@@ -843,12 +846,22 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 // All the functions are async, like create dir. 
                 MM.fs.createDir(path.directory, function() {
                     MM.log("Content: Downloading content to " + path.file + " from URL: " + downloadURL);
+
+
  
                     if ($(downCssId)) {
                         $(downCssId).attr("src", "img/loadingblack.gif");
                     }
 
-                    MM.moodleDownloadFile(downloadURL, path.file,
+
+                    if(MM.deviceConnected())
+                    {
+                         //   setInterval(function () {    }, blockConnInterval);
+
+                      
+
+
+                         MM.moodleDownloadFile(downloadURL, path.file,
                         function(fullpath) {
                             MM.log("Content: Download of content finished " + fullpath + " URL: " + downloadURL + " Index: " +index + "Local path: " + path.file);
                             content.contents[index].localpath = path.file;
@@ -894,6 +907,11 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                          },
                          background
                     );
+
+                    }
+                    else
+                        MM.plugins.contents.saveEventStats("N") ;    ////
+
                 });
             });
         },
@@ -997,7 +1015,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         var Eventstats = {            
                         'id':  MM.config.current_site.id  , 
                         'linkAvailableCount':  1,
-                        'linkNonAvailableCount':   0
+                        'linkNonAvailableCount':   0,
+                        'NoConnectivityPeriod': paramBuffer
                          
                         };
 
@@ -1007,7 +1026,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                          var Eventstats = {            
                         'id':  MM.config.current_site.id  , 
                         'linkAvailableCount':  0,
-                        'linkNonAvailableCount':   1
+                        'linkNonAvailableCount':   1,
+                        'NoConnectivityPeriod': paramBuffer
                          
                         };
 
@@ -1027,14 +1047,17 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                                if(status=="Y")
                                 {
-                                    links.linkAvailableCount =  links.linkAvailableCount + 1;
-                                  //  alert("Y" + links.linkAvailableCount);
+                                    links.linkAvailableCount =  links.linkAvailableCount + 1;                      
+                                    //alert("Y" + links.linkAvailableCount);
                                 }
                                 else
                                 {
                                     links.linkNonAvailableCount =  links.linkNonAvailableCount + 1;
-                                  //  alert("N" + links.linkNonAvailableCount);    
+                                   // alert("N" + links.linkNonAvailableCount);    
                                 }
+
+                                links.NoConnectivityPeriod= paramBuffer;
+                                // alert("P" + links.NoConnectivityPeriod);   
 
                                  MM.db.insert("mmEventStats", links);
 
@@ -1182,7 +1205,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
           //  alert("Avg: " + numCourses/diff  );
 
             var noCoursePerMil = numCourses/diff;
-            var paramBuffer = 60*1000;
+           // var paramBuffer = 60*1000;
 
             var coursesToGo = Math.ceil(paramBuffer * noCoursePerMil);
             // var coursesToGo =  paramBuffer * noCoursePerMil;
