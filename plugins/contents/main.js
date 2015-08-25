@@ -1142,22 +1142,24 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                        });
 
                     }
+                    else
+                    {    
 
-                    links = MM.db.where("mmStats", {'id': MM.config.current_site.id+ "-" + contentId, 'automated': false});  
-                    
-                    if ( links.length != 0)  
-                    {   
-                        $.each(links, function(index, links) {
-                       
-                             links = links.toJSON();
-                                
-                             links.lastaccesstimestamp =  new Date() ;    
-                             links.lastaccessdate =   MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
-                             MM.db.insert("mmStats", links);
-                                   
-                         });         
-                    }
-                    
+                        links = MM.db.where("mmStats", {'id': MM.config.current_site.id+ "-" + contentId, 'automated': false});  
+                        
+                        if ( links.length != 0)  
+                        {   
+                            $.each(links, function(index, links) {
+                           
+                                 links = links.toJSON();
+                                    
+                                 links.lastaccesstimestamp =  new Date() ;    
+                                 links.lastaccessdate =   MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
+                                 MM.db.insert("mmStats", links);
+                                       
+                             });         
+                        }
+                    } 
 
                     
                
@@ -1168,7 +1170,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 return;
 
               var lastDate =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
-              var searchinfo = MM.db.where("mmStats", {'courseId': courseId, 'automated': false,  'lastaccessdate': lastDate      });   
+              var searchinfo = MM.db.where("mmStats", {'courseId': courseId, 'automated': false,  'date': lastDate      });   
                 
               var minTime =new Date() ;
               var maxTime = new Date() ; 
@@ -1180,7 +1182,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                  $.each(searchinfo, function(index, link) {
                         link = link.toJSON();
                    
-                        temp = new Date(link.lastaccesstimestamp );
+                        temp = new Date(link.timestamp );
 
                         if (temp< minTime)
                             minTime = temp;
@@ -1192,7 +1194,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                  maxTime = minTime;
                  $.each(searchinfo, function(index, link) {
                         link = link.toJSON();
-                        temp = new Date(link.lastaccesstimestamp );
+                        temp = new Date(link.timestamp );
                         
                         if (temp> maxTime)
                         {
