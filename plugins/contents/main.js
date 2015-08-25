@@ -1205,10 +1205,10 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                   });  
 
-             //alert(maxTime);
-            // alert(minTime);
+             alert(maxTime);
+             alert(minTime);
             var diff = (maxTime-minTime);
-          // alert(numCourses + " in " + diff);
+            alert(numCourses + " in " + diff);
           //  alert("Avg: " + numCourses/diff  );
 
             var noCoursePerMil = numCourses/diff;
