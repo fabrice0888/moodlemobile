@@ -8,7 +8,7 @@ var templates = [
 
 
 var paramBuffer = 30000;
-var waitCount = 0;
+var waitCount = 0;/*
 setInterval(function () {  
 
 
@@ -19,7 +19,7 @@ setInterval(function () {
 
  }, paramBuffer);
 
-
+*/
 
 define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
@@ -387,6 +387,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                         //file available 
                        MM.plugins.contents.saveEventStats("Y") ;  
+                       alert($(this).data("course") +"-" + $(this).data("section")+"-" +  $(this).data("content"));
                        MM.plugins.contents.saveStats($(this).data("course"),$(this).data("section"), $(this).data("content"), false) ;             
                        MM.plugins.contents.downloadNextContentFile($(this).data("course"), $(this).data("section"), $(this).data("content"), 0);
                     }); 
@@ -1179,6 +1180,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
               var curSectionId;
               var curContentId;
  
+
                  $.each(searchinfo, function(index, link) {
                         link = link.toJSON();
                    
