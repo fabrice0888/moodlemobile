@@ -1216,7 +1216,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         numCourses1++;
 
                   });
-                 alert(numCourses1);
+                 alert(numCourses1 + "for " + courseId + " at  "+lastDate );
 
 
 
