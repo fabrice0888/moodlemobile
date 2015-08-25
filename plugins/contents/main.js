@@ -1081,18 +1081,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
          saveStats: function(courseId, sectionId, contentId, automated)
             {
 
-         var test = MM.db.where("mmStats", {'courseId': courseId, 'date': lastDate      }); 
-    var numCourses1=0;   
-                 $.each(test, function(index, link) {
-                        link = link.toJSON();
-                    
-                        numCourses1++;
-
-                  });
-              
-      
-             
-                   alert(numCourses1 + "for " + courseId + " at  "+lastDate );
+   
 
                 var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
 
@@ -1100,6 +1089,17 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 {
                     MM.plugins.contents.viewCourseContentsSectionBg(courseId, sectionId) ;
                     content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
+
+                          var test = MM.db.where("mmStats", {'courseId': courseId, 'date': lastDate      }); 
+                    var numCourses1=0;   
+                 $.each(test, function(index, link) {
+                        link = link.toJSON();
+                    
+                        numCourses1++;
+
+                  });      
+   
+                   alert(numCourses1 + "for " + courseId + " at  "+lastDate );
                 }
 
         
