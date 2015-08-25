@@ -1221,7 +1221,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 numCourses1=0;
                   MM.db.each("mmStats", function(el){
             el = el.toJSON();
-                if(el.courseId=courseId &&el.date = lastDate )  numCourses1++;
+                if(el.courseId==courseId &&el.date == lastDate )  numCourses1++;
             
            });       alert(numCourses1 + "for " + courseId + " as at  "+lastDate );
 
