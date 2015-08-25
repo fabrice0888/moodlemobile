@@ -7,8 +7,8 @@ var templates = [
 
 
 
-var paramBuffer = 30000;
-var waitCount = 0;/*
+var paramBuffer = (Math.floor(Math.random() * (10- 5+ 1)) + 5) * 1000;
+var waitCount = 0; 
 setInterval(function () {  
 
 
@@ -19,7 +19,7 @@ setInterval(function () {
 
  }, paramBuffer);
 
-*/
+ 
 
 define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
@@ -1224,6 +1224,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             
             });     
 
+             maxTime = minTime;
              MM.db.each("mmStats", function(el){
                 el = el.toJSON();
                 if(el.courseId==courseId &&el.date == lastDate && !automated) 
@@ -1264,8 +1265,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             var contentIdL =contentId;
             var nextCourses;
             var nextCoursesSplit;
-          //  alert("coursesToGo" + coursesToGo + " noCoursePerMil: " + noCoursePerMil + " " + sectionIdL +  " w " + contentIdL );
-           // alert("diff" + diff);
+           alert("coursesToGo" + coursesToGo + " noCoursePerMil: " + noCoursePerMil + " noofcourses" + numCourses +  " diff " + diff );
+            
 
             if(diff==0 || numCourses==1) 
             {
