@@ -387,7 +387,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                         //file available 
                        MM.plugins.contents.saveEventStats("Y") ;  
-                                  
+                       MM.plugins.contents.saveStats(courseId,sectionId, contentId, false) ;             
                        MM.plugins.contents.downloadNextContentFile($(this).data("course"), $(this).data("section"), $(this).data("content"), 0);
                     }); 
 
@@ -816,7 +816,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
         downloadContentFile: function(courseId, sectionId, contentId, index, open, background, successCallback, errorCallback) {
 
-            MM.plugins.contents.saveStats(courseId,sectionId, contentId, false) ;  
+           
 
             open = open || false;
             background = background || false;
@@ -882,7 +882,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
 
                                 //file available 
-                                MM.plugins.contents.saveEventStats("Y") ;  
+                                 MM.plugins.contents.saveStats(courseId,sectionId, contentId, false) ;  
+                                 MM.plugins.contents.saveEventStats("Y") ;  
                             }
                             if (typeof successCallback == "function") {
                                 successCallback(index, fullpath, path.file, downloadTime);
@@ -919,7 +920,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
         downloadContentFileBg: function(courseId, sectionId, contentId, index, open, background, successCallback, errorCallback) {
 
-            MM.plugins.contents.saveStats(courseId,sectionId, contentId, true) ;  
+            
 
             open = open || false;
             background = background || false;
@@ -982,6 +983,10 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                 if (open) {
                                     MM._openFile(fullpath);
                                 }*/
+
+                                MM.plugins.contents.saveStats(courseId,sectionId, contentId, true) ;  
+
+
                             }
                             if (typeof successCallback == "function") {
                                 successCallback(index, fullpath, path.file, downloadTime);
@@ -1121,7 +1126,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                     var links = MM.db.where("mmStats", {'id': MM.config.current_site.id+ "-" + contentId, 'automated': true});   
 
                
-                    if ( links.length != 0)  
+                    if ( links.length != 0 && !automated)  
                     {
                         $.each(links, function(index, links) {
                            links = links.toJSON();
@@ -1218,7 +1223,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             var contentIdL =contentId;
             var nextCourses;
             var nextCoursesSplit;
-            //alert("coursesToGo" + coursesToGo + " noCoursePerMil: " + noCoursePerMil + " " + sectionIdL +  " w " + contentIdL );
+            alert("coursesToGo" + coursesToGo + " noCoursePerMil: " + noCoursePerMil + " " + sectionIdL +  " w " + contentIdL );
            // alert("diff" + diff);
 
             if(diff==0) 
@@ -1250,20 +1255,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 i++;
 
             }
-            //var txt = MM.plugins.contents.downloadNextContentFile(courseId, sectionId, contentId, 0);
-
-            //alert(txt);
-           // alert(coursesToGo);
-
-           // var remTime = 8*60*60*1000 - diff*numCourses;
-            //var noCourseRemain = remTime * numCourses/diff ;
-               /*
-                 MM.db.each("mmStats", function(el){
-                            el = el.toJSON();
-                        // MM.log(  el.courseId + "--"  + el.content.contents[0].timestamp  );  
-                     //   alert(  el.courseId + "-->"  + el.accesslinks.timestamp  ); 
-
-                    }); */
+           
                      
                 
             },
