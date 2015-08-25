@@ -387,7 +387,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                         //file available 
                        MM.plugins.contents.saveEventStats("Y") ;  
-                       MM.plugins.contents.saveStats(courseId,sectionId, contentId, false) ;             
+                       MM.plugins.contents.saveStats($(this).data("course"),,$(this).data("section"), $(this).data("content"), false) ;             
                        MM.plugins.contents.downloadNextContentFile($(this).data("course"), $(this).data("section"), $(this).data("content"), 0);
                     }); 
 
