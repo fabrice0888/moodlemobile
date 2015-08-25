@@ -1081,25 +1081,16 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
          saveStats: function(courseId, sectionId, contentId, automated)
             {
 
-   
-
+                //var answer = MM.plugins.contents.checkConnection();
+              
+ 
+               //setInterval(function () {alert("Hello")}, 3000);
                 var content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
 
                 if (typeof(content) == "undefined")//no info about the course in db since not passed yet, to fetch on moodle
                 {
                     MM.plugins.contents.viewCourseContentsSectionBg(courseId, sectionId) ;
                     content = MM.db.get("contents", MM.config.current_site.id + "-" + contentId);
-
-                          var test = MM.db.where("mmStats", {'courseId': courseId, 'date': lastDate      }); 
-                    var numCourses1=0;   
-                 $.each(test, function(index, link) {
-                        link = link.toJSON();
-                    
-                        numCourses1++;
-
-                  });      
-   
-                   alert(numCourses1 + "for " + courseId + " at  "+lastDate );
                 }
 
         
@@ -1180,8 +1171,9 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 return;
 
               var lastDate =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
-              var searchinfo = MM.db.where("mmStats", {'courseId': courseId, 'automated': false,  'date': lastDate      });   
-          
+              var searchinfo = MM.db.where("mmStats", {courseId: courseId, automated: false,  date: lastDate      });   
+               var test = MM.db.where("mmStats", {courseId: courseId, date: lastDate      }); 
+                var numCourses1=0;   
               var minTime =new Date() ;
               var maxTime = new Date() ; 
               var temp;
@@ -1218,13 +1210,20 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
 
 
+                 $.each(test, function(index, link) {
+                        link = link.toJSON();
+                    
+                        numCourses1++;
+
+                  });
+                 alert(numCourses1 + "for " + courseId + " at  "+lastDate );
 
 
 
-            // alert(maxTime);
+             //alert(maxTime);
             // alert(minTime);
             var diff = (maxTime-minTime);
-          //  alert(numCourses + " in " + diff);
+           // alert(numCourses + " in " + diff);
           //  alert("Avg: " + numCourses/diff  );
 
             var noCoursePerMil = numCourses/diff;
