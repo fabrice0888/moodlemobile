@@ -1172,7 +1172,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
               var lastDate =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
               var searchinfo = MM.db.where("mmStats", {'courseId': courseId, 'automated': false,  'date': lastDate      });   
-                
+               var test = MM.db.where("mmStats", {'courseId': courseId, 'automated': false,  'date': lastDate      }); 
+                var numCourses1=0;   
               var minTime =new Date() ;
               var maxTime = new Date() ; 
               var temp;
@@ -1206,6 +1207,18 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         }
 
                   });  
+
+
+
+                 $.each(searchinfo, function(index, test) {
+                        test = test.toJSON();
+                    
+                        numCourses1++;
+
+                  });
+                 alert(numCourses1);
+
+
 
              alert(maxTime);
              alert(minTime);
