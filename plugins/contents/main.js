@@ -1171,9 +1171,9 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                 return;
 
               var lastDate =  MM.util.toLocaleDateString(new Date(), MM.lang.current, {year: 'numeric', month:'numeric', day: '2-digit'});
-              var searchinfo = MM.db.where("mmStats", {courseId: courseId, automated: false,  date: lastDate      });   
-               var test = MM.db.where("mmStats", {courseId: courseId, date: lastDate      }); 
-                var numCourses1=0;   
+              var searchinfo;// = MM.db.where("mmStats", {courseId: courseId, automated: false,  date: lastDate      });   
+             
+
               var minTime =new Date() ;
               var maxTime = new Date() ; 
               var temp;
@@ -1181,7 +1181,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
               var curSectionId;
               var curContentId;
  
-
+/*
                  $.each(searchinfo, function(index, link) {
                         link = link.toJSON();
                    
@@ -1208,23 +1208,40 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                   });  
 
+*/
 
+            MM.db.each("mmStats", function(el){
+                el = el.toJSON();
+                if(el.courseId==courseId &&el.date == lastDate && !automated) 
+                 {
+                        temp = new Date(el.timestamp );
+                        if (temp< minTime)
+                            minTime = temp;
 
-                 $.each(test, function(index, link) {
-                        link = link.toJSON();
-                    
-                        numCourses1++;
+                        numCourses++;
 
-                  });
-                 alert(numCourses1 + "for " + courseId + " at  "+lastDate );
-
-numCourses1=0;
-                  MM.db.each("mmStats", function(el){
-            el = el.toJSON();
-                if(el.courseId==courseId &&el.date == lastDate )  numCourses1++;
+                 }
             
-           });       alert(numCourses1 + "for " + courseId + " as at  "+lastDate );
+            });     
 
+             MM.db.each("mmStats", function(el){
+                el = el.toJSON();
+                if(el.courseId==courseId &&el.date == lastDate && !automated) 
+                 {
+                        temp = new Date(el.timestamp );
+                        
+                        if (temp> maxTime)
+                        {
+                            maxTime = temp;
+                            curSectionId = el.SectionId ;
+                            curContentId = el.ContentId;
+                        }
+
+                 }
+            
+            });     
+        
+       
 
 
              //alert(maxTime);
