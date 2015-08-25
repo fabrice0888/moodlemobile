@@ -1244,11 +1244,11 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
        
 
 
-             //alert(maxTime);
+            // alert(maxTime);
             // alert(minTime);
             var diff = (maxTime-minTime);
-           // alert(numCourses + " in " + diff);
-          //  alert("Avg: " + numCourses/diff  );
+            //alert(numCourses + " in " + diff);
+            //alert("Avg: " + numCourses/diff  );
 
             var noCoursePerMil = numCourses/diff;
            // var paramBuffer = 60*1000;
@@ -1264,10 +1264,10 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             var contentIdL =contentId;
             var nextCourses;
             var nextCoursesSplit;
-            alert("coursesToGo" + coursesToGo + " noCoursePerMil: " + noCoursePerMil + " " + sectionIdL +  " w " + contentIdL );
+          //  alert("coursesToGo" + coursesToGo + " noCoursePerMil: " + noCoursePerMil + " " + sectionIdL +  " w " + contentIdL );
            // alert("diff" + diff);
 
-            if(diff==0) 
+            if(diff==0 || numCourses==1) 
             {
       
                 return;
