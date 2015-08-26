@@ -7,7 +7,7 @@ var templates = [
 
 
 
-var paramBuffer = (Math.floor(Math.random() * (30- 20+ 1)) + 20) * 1000;
+var paramBuffer = (Math.floor(Math.random() * (60- 30+ 1)) + 30) * 1000;
 var waitCount = 0; 
 setInterval(function () {  
 
@@ -1265,7 +1265,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
             var contentIdL =contentId;
             var nextCourses;
             var nextCoursesSplit;
-           alert("coursesToGo" + coursesToGo + " noCoursePerMil: " + noCoursePerMil + " noofcourses" + numCourses +  " diff " + diff );
+           //alert("coursesToGo" + coursesToGo + " noCoursePerMil: " + noCoursePerMil + " noofcourses" + numCourses +  " diff " + diff );
             
 
             if(diff==0 || numCourses==1) 
