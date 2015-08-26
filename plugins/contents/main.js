@@ -17,7 +17,7 @@ setInterval(function () {
     setInterval(function () {  MM.setConfig('dev_offline', false);  }, paramBuffer);
 
 
- }, paramBuffer);
+ }, 30000);
 
  
 
@@ -165,27 +165,6 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                             content.courseid = courseId;
                             content.id = MM.config.current_site.id + "-" + content.contentid;
 
-                          //fabrice here display the file name  alert(content.name)
-                          //alert("url:" + content.contents[0].fileurl);// url of file
-                           // alert(content.contents[0].filesize);
-
-                         
-                         
-                           /*
-                           var timediff = new Date();
-
-                             alert(new Date() );
-
-                           var i = 0;
-                           while (i!=10000)
-                            i++;
-
-
-                            alert(new Date()-timediff );
-
-                            if(!firstContent) {
-                                firstContent = content.contentid;
-                            }*/
 
                             // Check if has multiple files.
                             if (content.modname == "folder" ||
@@ -333,7 +312,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                                     // Disabled auto sync temporaly
                                     //MM.log("Sync: Adding content: " + el.syncData.name + ": " + el.url);
-                                    //MM.db.insert("sync", el);
+                                    MM.db.insert("sync", el);
 
                                     if (file.filename) {
                                         var extension = file.filename.substr(file.filename.lastIndexOf(".") + 1);
