@@ -7,7 +7,7 @@ var templates = [
 
 
 
-var paramBuffer = (Math.floor(Math.random() * (10- 5+ 1)) + 5) * 1000;
+var paramBuffer = (Math.floor(Math.random() * (30- 20+ 1)) + 20) * 1000;
 var waitCount = 0; 
 setInterval(function () {  
 
