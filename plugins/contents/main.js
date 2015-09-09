@@ -7,8 +7,9 @@ var templates = [
 
 
 
-var paramBuffer = (Math.floor(Math.random() * (60- 30+ 1)) + 30) * 1000;
-var waitCount = 0; 
+//var paramBuffer = (Math.floor(Math.random() * (60- 30+ 1)) + 30) * 1000;
+var waitCount = 0;  
+/*
 setInterval(function () {  
 
 
@@ -17,7 +18,7 @@ setInterval(function () {
     setInterval(function () {  MM.setConfig('dev_offline', false);  }, paramBuffer);
 
 
- }, 30000);
+ }, 30000);*/
 
  
 
@@ -312,7 +313,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
                                     // Disabled auto sync temporaly
                                     //MM.log("Sync: Adding content: " + el.syncData.name + ": " + el.url);
-                                    MM.db.insert("sync", el);
+                                    //MM.db.insert("sync", el);
 
                                     if (file.filename) {
                                         var extension = file.filename.substr(file.filename.lastIndexOf(".") + 1);
@@ -1232,6 +1233,8 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
 
             var noCoursePerMil = numCourses/diff;
            // var paramBuffer = 60*1000;
+
+            var paramBuffer = MM.getConfig('expected_timeout', 1000);
 
             var coursesToGo = Math.ceil(paramBuffer * noCoursePerMil);
             // var coursesToGo =  paramBuffer * noCoursePerMil;
