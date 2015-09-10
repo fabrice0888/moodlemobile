@@ -1002,7 +1002,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         'id':  MM.config.current_site.id  , 
                         'linkAvailableCount':  1,
                         'linkNonAvailableCount':   0,
-                        'NoConnectivityPeriod': paramBuffer
+                        'NoConnectivityPeriod': MM.getConfig('expected_timeout', 1000) //paramBuffer
                          
                         };
 
@@ -1013,7 +1013,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                         'id':  MM.config.current_site.id  , 
                         'linkAvailableCount':  0,
                         'linkNonAvailableCount':   1,
-                        'NoConnectivityPeriod': paramBuffer
+                        'NoConnectivityPeriod': MM.getConfig('expected_timeout', 1000)// paramBuffer
                          
                         };
 
