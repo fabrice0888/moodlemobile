@@ -1042,7 +1042,7 @@ define(templates,function (sectionsTpl, contentsTpl, folderTpl, mimeTypes) {
                                    // alert("N" + links.linkNonAvailableCount);    
                                 }
 
-                                links.NoConnectivityPeriod= paramBuffer;
+                                links.NoConnectivityPeriod= MM.getConfig('expected_timeout', 1000); //paramBuffer;
                                 // alert("P" + links.NoConnectivityPeriod);   
 
                                  MM.db.insert("mmEventStats", links);
